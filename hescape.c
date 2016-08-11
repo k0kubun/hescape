@@ -55,18 +55,19 @@ static const char HTML_ESCAPE_TABLE[] = {
 int
 hesc_escape_html(hesc_buf *dest, const uint8_t *src, size_t len)
 {
+  const uint8_t *head = src, *end = src + len;
   int ret = 0;
-  size_t i = 0, esc_i;
 
-  while (i < len) {
-    while (i < len && HTML_ESCAPE_TABLE[src[i]] == 0)
-      i++;
-    if (HTML_ESCAPE_TABLE[src[i]]) {
+  while (src < end) {
+    while (src < end && HTML_ESCAPE_TABLE[*src] == 0)
+      src++;
+    if (HTML_ESCAPE_TABLE[*src]) {
       ret = 1;
     }
-    i++;
+    src++;
   }
-  dest->str = (char *)src;
+
+  dest->str = (char *)head;
   dest->len = len;
   return ret;
 }

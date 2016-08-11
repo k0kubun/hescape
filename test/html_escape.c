@@ -9,6 +9,7 @@ test_return_value()
   TEST_RETURN(1, "&");
   TEST_RETURN(1, "\"");
   TEST_RETURN(1, "'");
+  TEST_RETURN(1, "123456789012345>");
   TEST_RETURN(0, "/");
   TEST_RETURN(1, "<script></script>");
 }
