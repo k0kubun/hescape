@@ -1,12 +1,16 @@
 LD=g++
 BENCHOBJS=benchmark/benchmark.o hescape.o benchmark/houdini/buffer.o benchmark/houdini/houdini_html_e.o
 TESTOBJS=test/html_escape.o hescape.o
-.PHONY: all bench test
+.PHONY: all bench clean test
 
 all: hescape.o
 
 bench: benchmark/benchmark
 	benchmark/benchmark
+
+clean:
+	$(RM) $(BENCHOBJS) $(TESTOBJS)
+	cd benchmark/houdini && $(MAKE) clean
 
 test: test/html_escape
 	test/html_escape
