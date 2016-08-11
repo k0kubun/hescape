@@ -47,17 +47,17 @@ measure_time(const char *str, long iteration, void (* escape_func)(const char *)
 }
 
 void
+escape_with_hescape(const char *str)
+{
+  hesc_buf buf = HESC_BUF_INIT;
+  hesc_escape_html(&buf, str, strlen(str));
+}
+
+void
 escape_with_houdini(const char *str)
 {
   gh_buf buf = GH_BUF_INIT;
   houdini_escape_html0(&buf, str, strlen(str), 0);
-}
-
-void
-escape_with_hescape(const char *str)
-{
-  hesc_buf buf = (hesc_buf){ .str = NULL, .len = 0 };
-  hesc_escape_html(&buf, str, strlen(str));
 }
 
 void
@@ -78,9 +78,10 @@ bench_escape(const char *label, const char *str, long iteration)
 int
 main(void)
 {
-  bench_escape("no escape", strcont("0123456789", 100), 10000);
-  bench_escape("10% escape", strcont("'123456789", 100), 10000);
-  bench_escape("all escape", strcont("><&\"'", 200), 10000);
+  const long n = 100000;
+  bench_escape("no escape", strcont("0123456789", 100), n);
+  bench_escape("10% escape", strcont("'123456789", 100), n);
+  bench_escape("all escape", strcont("><&\"'", 200), n);
   bench_escape("wikipedia table", readfile("benchmark/wikipedia_table.txt"), 10000);
   return 0;
 }

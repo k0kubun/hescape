@@ -1,5 +1,8 @@
 #include "hescape.h"
 
+// Non-null and zero terminated buffer.
+char __hesc_initbuf[1];
+
 /*
  * Replace characters according to the following rules.
  *
