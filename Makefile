@@ -1,6 +1,7 @@
 LD=g++
 BENCHOBJS=benchmark/benchmark.o hescape.o benchmark/houdini/buffer.o benchmark/houdini/houdini_html_e.o
 TESTOBJS=test/html_escape.o hescape.o
+CFLAGS ?= -O2
 .PHONY: all bench clean test
 
 all: hescape.o
@@ -22,19 +23,19 @@ test/html_escape: $(TESTOBJS)
 	$(LD) $(TESTOBJS) -o $@
 
 hescape.o: hescape.c hescape.h
-	$(CC) -c -o $@ $<
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -c -o $@ $<
 
 benchmark/benchmark.o: benchmark/benchmark.c hescape.h benchmark/houdini/houdini.h
-	$(CC) -c -o $@ $<
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -c -o $@ $<
 
 benchmark/houdini/houdini.h:
 	git submodule init && git submodule update
 
 benchmark/houdini/buffer.o: benchmark/houdini/houdini.h
-	cd benchmark/houdini && $(MAKE) objects
+	cd benchmark/houdini && CFLAGS="$(CFLAGS)" $(MAKE) objects
 
 benchmark/houdini/houdini_html_e.o: benchmark/houdini/houdini.h
-	cd benchmark/houdini && $(MAKE) objects
+	cd benchmark/houdini && CFLAGS="$(CFLAGS)" $(MAKE) objects
 
 test/html_escape.o: test/html_escape.c test/test_helper.h hescape.h
-	$(CC) -c -o $@ $<
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -c -o $@ $<
