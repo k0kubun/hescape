@@ -1,0 +1,3 @@
+[submodule "benchmark/houdini"]
+	path = benchmark/houdini
+	url = https://github.com/vmg/houdini
