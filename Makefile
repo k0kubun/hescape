@@ -2,7 +2,7 @@ LD=g++
 BENCHOBJS=benchmark/benchmark.o hescape.o benchmark/houdini/buffer.o benchmark/houdini/houdini_html_e.o
 TESTOBJS=test/html_escape.o hescape.o
 CFLAGS ?= -O2
-.PHONY: all bench clean test
+.PHONY: all bench clean test run
 
 all: hescape.o
 
@@ -12,6 +12,11 @@ bench: benchmark/benchmark
 clean:
 	$(RM) $(BENCHOBJS) $(TESTOBJS)
 	cd benchmark/houdini && $(MAKE) clean
+
+run: test/run.c hescape.o
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -c -o test/run.o $<
+	$(LD) test/run.o hescape.o -o test/run
+	test/run
 
 test: test/html_escape
 	test/html_escape
