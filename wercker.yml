@@ -1,0 +1,6 @@
+box: k0kubun/build-essential
+build:
+  steps:
+    - script:
+        name: compile
+        code: make
