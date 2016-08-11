@@ -4,3 +4,6 @@ build:
     - script:
         name: compile
         code: make
+    - script:
+        name: test
+        code: make test

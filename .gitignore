@@ -1,1 +1,2 @@
 *.o
+test/html_escape
