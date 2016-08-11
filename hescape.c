@@ -19,4 +19,5 @@ hesc_escape_html(hesc_buf *dest, const uint8_t *src, size_t len)
 {
   dest->str = (char *)src;
   dest->len = len;
+  return 0;
 }

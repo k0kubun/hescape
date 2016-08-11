@@ -1,3 +1,4 @@
 *.o
+*.s
 benchmark/benchmark
 test/html_escape

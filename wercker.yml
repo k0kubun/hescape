@@ -10,3 +10,13 @@ build:
     - script:
         name: benchmark
         code: make bench
+    - script:
+        name: dump hescape assembly
+        code: |
+          gcc -O2 -S hescape.c
+          cat hescape.s
+    - script:
+        name: dump houdini assembly
+        code: |
+          gcc -O2 -S benchmark/houdini/houdini_html_e.c
+          cat houdini_html_e.s
