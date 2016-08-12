@@ -58,24 +58,22 @@ static const char HTML_ESCAPE_TABLE[] = {
 size_t
 hesc_escape_html(uint8_t **dest, const uint8_t *buf, size_t size)
 {
+  size_t esc_i, esize = 0;
   const uint8_t *esc;
-  size_t rsize = 0, esize = 1, esc_i;
-  uint8_t *rbuf = (uint8_t *)malloc(sizeof(uint8_t) * (size + esize));
+  uint8_t *rbuf = (uint8_t *)malloc(sizeof(uint8_t) * (size + 1));
 
   for (size_t i = 0; i < size; i++) {
     if ((esc_i = HTML_ESCAPE_TABLE[buf[i]])) {
       esc = ESCAPED_STRING[esc_i];
-      esize += strlen(esc);
-      rbuf = (uint8_t *)realloc(rbuf, sizeof(uint8_t) * (size + esize));
-      memmove(rbuf + rsize, esc, strlen(esc));
-      rsize += strlen(esc);
+      rbuf = (uint8_t *)realloc(rbuf, sizeof(uint8_t) * (size + esize + strlen(esc) + 1));
+      memmove(rbuf + i + esize, esc, strlen(esc));
+      esize += strlen(esc) - 1;
     } else {
-      rbuf[rsize] = buf[i];
-      rsize++;
+      rbuf[i + esize] = buf[i];
     }
   }
-  rbuf[rsize] = '\0';
+  rbuf[size + esize] = '\0';
 
   *dest = rbuf;
-  return rsize;
+  return size + esize;
 }
