@@ -42,17 +42,11 @@ expect_int(int expected, int actual, const char *file, int line)
   }
 }
 
-#define TEST_RETURN(expected, src) { \
-  hesc_buf buf = HESC_BUF_INIT; \
-  int actual = hesc_escape_html(&buf, src, strlen(src)); \
-  expect_int(expected, actual, __FILE__, __LINE__); \
-}
-
 #define TEST_RESULT(expected, src) { \
-  hesc_buf buf = HESC_BUF_INIT; \
-  hesc_escape_html(&buf, src, strlen(src)); \
-  expect_str(expected, buf.str, __FILE__, __LINE__); \
-  expect_int(strlen(buf.str), buf.len, __FILE__, __LINE__); \
+  uint8_t *dest = NULL; \
+  size_t len = hesc_escape_html(&dest, src, strlen(src)); \
+  expect_str(expected, dest, __FILE__, __LINE__); \
+  expect_int(strlen(dest), len, __FILE__, __LINE__); \
 }
 
 void

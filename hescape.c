@@ -17,9 +17,6 @@
 # define unlikely(x) (x)
 #endif
 
-// Non-null and zero terminated buffer.
-char __hesc_initbuf[1];
-
 static const char *ESCAPED_STRING[] = {
   "",
   "&quot;",
@@ -57,69 +54,9 @@ static const char HTML_ESCAPE_TABLE[] = {
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 };
 
-static const char*
-find_escaped_fast(const char *buf, const char *buf_end, int *found)
+size_t
+hesc_escape_html(uint8_t **dest, const uint8_t *buf, size_t size)
 {
-  static const char ranges[] = "\"&'<>";
-
-  if (likely(buf_end - buf >= 16)) {
-    __m128i ranges16 = _mm_loadu_si128((const __m128i *)ranges);
-    size_t left = (buf_end - buf) & ~15;
-    do {
-      __m128i b16 = _mm_loadu_si128((void *)buf);
-      int index = _mm_cmpestri(ranges16, 5, b16, 16, _SIDD_CMP_EQUAL_ANY);
-      if (unlikely(index != 16)) {
-        buf += index;
-        *found = 1;
-        break;
-      }
-      buf += 16;
-      left -= 16;
-    } while(likely(left != 0));
-  }
-  return buf;
-}
-
-/*
- * Replace characters according to the following rules.
- * This function can handle only ASCII-compatible string.
- *
- * " => &quot;
- * & => &amp;
- * ' => &#39;
- * < => &lt;
- * > => &gt;
- *
- * @return 1 if there is escaped characters, which means that dest->str is newly allocated.
- */
-int
-hesc_escape_html(hesc_buf *dest, const uint8_t *buf, size_t len)
-{
-  const uint8_t *head = buf, *buf_end = buf + len;
-  int ret = 0, found;
-
-  while (buf < buf_end) {
-    buf = find_escaped_fast(buf, buf_end, &found);
-    if (found) {
-      if (HTML_ESCAPE_TABLE[*buf]) {
-        ret = 1;
-      }
-      buf++;
-    } else {
-      break;
-    }
-  }
-
-  while (buf < buf_end) {
-    while (buf < buf_end && HTML_ESCAPE_TABLE[*buf] == 0)
-      buf++;
-    if (HTML_ESCAPE_TABLE[*buf]) {
-      ret = 1;
-    }
-    buf++;
-  }
-
-  dest->str = (char *)head;
-  dest->len = len;
-  return ret;
+  *dest = (uint8_t *)buf;
+  return size;
 }

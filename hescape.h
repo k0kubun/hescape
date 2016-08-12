@@ -4,14 +4,18 @@
 #include <sys/types.h>
 #include <stdint.h>
 
-extern char __hesc_initbuf[];
-#define HESC_BUF_INIT { __hesc_initbuf, 0 }
-
-typedef struct {
-  char *str;
-  size_t len;
-} hesc_buf;
-
-extern int hesc_escape_html(hesc_buf *dest, const uint8_t *src, size_t len);
+/*
+ * Replace characters according to the following rules.
+ * Note that this function can handle only ASCII-compatible string.
+ *
+ * " => &quot;
+ * & => &amp;
+ * ' => &#39;
+ * < => &lt;
+ * > => &gt;
+ *
+ * @return size of dest. If it's larger than len, dest is required to be freed.
+ */
+extern size_t hesc_escape_html(uint8_t **dest, const uint8_t *src, size_t size);
 
 #endif

@@ -49,7 +49,7 @@ measure_time(const char *str, long iteration, void (* escape_func)(const char *)
 void
 escape_with_hescape(const char *str)
 {
-  hesc_buf buf = HESC_BUF_INIT;
+  uint8_t *buf = NULL;
   hesc_escape_html(&buf, str, strlen(str));
 }
 
