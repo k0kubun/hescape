@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include "hescape.h"
 
 #ifdef __SSE4_2__
@@ -17,7 +18,7 @@
 # define unlikely(x) (x)
 #endif
 
-static const char *ESCAPED_STRING[] = {
+static const uint8_t *ESCAPED_STRING[] = {
   "",
   "&quot;",
   "&amp;",
@@ -57,6 +58,25 @@ static const char HTML_ESCAPE_TABLE[] = {
 size_t
 hesc_escape_html(uint8_t **dest, const uint8_t *buf, size_t size)
 {
-  *dest = (uint8_t *)buf;
-  return size;
+  const uint8_t *esc;
+  uint8_t *rbuf = NULL;
+  size_t rsize = 0, esc_i;
+
+  for (size_t i = 0; i < size; i++) {
+    if ((esc_i = HTML_ESCAPE_TABLE[buf[i]])) {
+      esc = ESCAPED_STRING[esc_i];
+      rbuf = (uint8_t *)realloc(rbuf, sizeof(uint8_t) * (rsize + strlen(esc)));
+      memmove(rbuf + rsize, esc, strlen(esc));
+      rsize += strlen(esc);
+    } else {
+      rbuf = (uint8_t *)realloc(rbuf, sizeof(uint8_t) * (rsize + 1));
+      rbuf[rsize] = buf[i];
+      rsize++;
+    }
+  }
+  rbuf = (uint8_t *)realloc(rbuf, sizeof(uint8_t) * (rsize + 1));
+  rbuf[rsize] = '\0';
+
+  *dest = rbuf;
+  return rsize;
 }
