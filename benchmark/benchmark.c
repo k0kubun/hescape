@@ -78,10 +78,9 @@ bench_escape(const char *label, const char *str, long iteration)
 int
 main(void)
 {
-  const long n = 100000;
-  bench_escape("no escape", strcont("0123456789", 100), n);
-  bench_escape("10% escape", strcont("'123456789", 100), n);
-  bench_escape("all escape", strcont("><&\"'", 200), n);
+  bench_escape("no escape", strcont("0123456789", 100), 300000);
+  bench_escape("10% escape", strcont("'123456789", 100), 50000);
+  bench_escape("all escape", strcont("><&\"'", 200), 10000);
   bench_escape("wikipedia table", readfile("benchmark/wikipedia_table.txt"), 10000);
   return 0;
 }
