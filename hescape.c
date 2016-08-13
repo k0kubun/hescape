@@ -55,17 +55,41 @@ static const char HTML_ESCAPE_TABLE[] = {
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 };
 
+uint8_t*
+ensure_allocated(uint8_t *buf, size_t size, size_t *asize)
+{
+  if (size < *asize)
+    return buf;
+
+  size_t new_size;
+  if (*asize == 0) {
+    new_size = size;
+  } else {
+    new_size = *asize;
+  }
+
+  // Increase buffer size by 1.5x if realloced multiple times.
+  while (new_size < size)
+    new_size = (new_size << 1) - (new_size >> 1);
+
+  // Round allocation up to multiple of 8.
+  new_size = (new_size + 7) & ~7;
+
+  *asize = new_size;
+  return realloc(buf, new_size);
+}
+
 size_t
 hesc_escape_html(uint8_t **dest, const uint8_t *buf, size_t size)
 {
-  size_t esc_i, esize = 0, rbuf_end = 0;
+  size_t asize = 0, esc_i, esize = 0, rbuf_end = 0;
   const uint8_t *esc;
   uint8_t *rbuf = NULL;
 
   for (size_t i = 0; i < size; i++) {
     if ((esc_i = HTML_ESCAPE_TABLE[buf[i]])) {
       esc = ESCAPED_STRING[esc_i];
-      rbuf = (uint8_t *)realloc(rbuf, sizeof(uint8_t) * (size + esize + strlen(esc) + 1));
+      rbuf = ensure_allocated(rbuf, sizeof(uint8_t) * (size + esize + strlen(esc) + 1), &asize);
 
       memmove(rbuf + rbuf_end, buf + (rbuf_end - esize), i - (rbuf_end - esize));
       memmove(rbuf + i + esize, esc, strlen(esc));
