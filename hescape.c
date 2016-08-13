@@ -86,23 +86,30 @@ ensure_allocated(uint8_t *buf, size_t size, size_t *asize)
 size_t
 hesc_escape_html(uint8_t **dest, const uint8_t *buf, size_t size)
 {
-  size_t asize = 0, esc_i, esize = 0, rbuf_end = 0;
+  size_t asize = 0, esc_i, esize = 0, i = 0, rbuf_end = 0;
   const uint8_t *esc;
   uint8_t *rbuf = NULL;
 
-  for (size_t i = 0; i < size; i++) {
-    if ((esc_i = HTML_ESCAPE_TABLE[buf[i]])) {
+  while (i < size) {
+    // Loop here to skip non-escaped characters fast.
+    while (i < size && (esc_i = HTML_ESCAPE_TABLE[buf[i]]) == 0)
+      i++;
+
+    if (esc_i) {
       esc = ESCAPED_STRING[esc_i];
       rbuf = ensure_allocated(rbuf, sizeof(uint8_t) * (size + esize + ESC_LEN(esc_i) + 1), &asize);
 
+      // Copy pending characters and escaped string.
       memmove(rbuf + rbuf_end, buf + (rbuf_end - esize), i - (rbuf_end - esize));
       memmove(rbuf + i + esize, esc, ESC_LEN(esc_i));
       rbuf_end = i + esize + ESC_LEN(esc_i);
       esize += ESC_LEN(esc_i) - 1;
     }
+    i++;
   }
 
   if (rbuf_end == 0) {
+    // Return given buf and size if there are no escaped characters.
     *dest = (uint8_t *)buf;
     return size;
   } else {
