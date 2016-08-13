@@ -27,6 +27,10 @@ static const uint8_t *ESCAPED_STRING[] = {
   "&gt;",
 };
 
+// This is strlen(ESCAPED_STRING[x]) optimized specially.
+// Mapping: 1 => 6, 2 => 5, 3 => 5, 4 => 4, 5 => 4
+#define ESC_LEN(x) ((13 - x) / 2)
+
 /*
  * Given ASCII-compatible character, return index of ESCAPED_STRING.
  *
@@ -89,12 +93,12 @@ hesc_escape_html(uint8_t **dest, const uint8_t *buf, size_t size)
   for (size_t i = 0; i < size; i++) {
     if ((esc_i = HTML_ESCAPE_TABLE[buf[i]])) {
       esc = ESCAPED_STRING[esc_i];
-      rbuf = ensure_allocated(rbuf, sizeof(uint8_t) * (size + esize + strlen(esc) + 1), &asize);
+      rbuf = ensure_allocated(rbuf, sizeof(uint8_t) * (size + esize + ESC_LEN(esc_i) + 1), &asize);
 
       memmove(rbuf + rbuf_end, buf + (rbuf_end - esize), i - (rbuf_end - esize));
-      memmove(rbuf + i + esize, esc, strlen(esc));
-      rbuf_end = i + esize + strlen(esc);
-      esize += strlen(esc) - 1;
+      memmove(rbuf + i + esize, esc, ESC_LEN(esc_i));
+      rbuf_end = i + esize + ESC_LEN(esc_i);
+      esize += ESC_LEN(esc_i) - 1;
     }
   }
 
