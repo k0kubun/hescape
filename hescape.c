@@ -59,7 +59,7 @@ static const char HTML_ESCAPE_TABLE[] = {
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 };
 
-uint8_t*
+static uint8_t*
 ensure_allocated(uint8_t *buf, size_t size, size_t *asize)
 {
   if (size < *asize)
