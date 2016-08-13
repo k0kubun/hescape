@@ -83,6 +83,31 @@ ensure_allocated(uint8_t *buf, size_t size, size_t *asize)
   return realloc(buf, new_size);
 }
 
+#ifdef __SSE4_2__
+static size_t
+find_escape_fast(const char *buf, size_t i, size_t size, int *found)
+{
+  static const char escapes[] = "\"&'<>";
+
+  if (likely(size - i >= 16)) {
+    __m128i escapes5 = _mm_loadu_si128((const __m128i *)escapes);
+    size_t left = (size - i) & ~15;
+    do {
+      __m128i b16 = _mm_loadu_si128((void *)buf);
+      int index = _mm_cmpestri(escapes5, 5, b16, 16, _SIDD_CMP_EQUAL_ANY);
+      if (unlikely(index != 16)) {
+        i += index;
+        *found = 1;
+        break;
+      }
+      i += 16;
+      left -= 16;
+    } while(likely(left != 0));
+  }
+  return i;
+}
+#endif
+
 size_t
 hesc_escape_html(uint8_t **dest, const uint8_t *buf, size_t size)
 {
@@ -90,21 +115,33 @@ hesc_escape_html(uint8_t **dest, const uint8_t *buf, size_t size)
   const uint8_t *esc;
   uint8_t *rbuf = NULL;
 
+# define DO_ESCAPE() { \
+    esc = ESCAPED_STRING[esc_i]; \
+    rbuf = ensure_allocated(rbuf, sizeof(uint8_t) * (size + esize + ESC_LEN(esc_i) + 1), &asize); \
+    memmove(rbuf + rbuf_end, buf + (rbuf_end - esize), i - (rbuf_end - esize)); \
+    memmove(rbuf + i + esize, esc, ESC_LEN(esc_i)); \
+    rbuf_end = i + esize + ESC_LEN(esc_i); \
+    esize += ESC_LEN(esc_i) - 1; \
+  }
+
+# ifdef __SSE4_2__
+  int found = 0;
+  while (i < size) {
+    i = find_escape_fast(buf, i, size, &found);
+    if (!found) break;
+
+    esc_i = HTML_ESCAPE_TABLE[buf[i]];
+    if (esc_i) DO_ESCAPE();
+    i++;
+  }
+# endif
+
   while (i < size) {
     // Loop here to skip non-escaped characters fast.
     while (i < size && (esc_i = HTML_ESCAPE_TABLE[buf[i]]) == 0)
       i++;
 
-    if (esc_i) {
-      esc = ESCAPED_STRING[esc_i];
-      rbuf = ensure_allocated(rbuf, sizeof(uint8_t) * (size + esize + ESC_LEN(esc_i) + 1), &asize);
-
-      // Copy pending characters and escaped string.
-      memmove(rbuf + rbuf_end, buf + (rbuf_end - esize), i - (rbuf_end - esize));
-      memmove(rbuf + i + esize, esc, ESC_LEN(esc_i));
-      rbuf_end = i + esize + ESC_LEN(esc_i);
-      esize += ESC_LEN(esc_i) - 1;
-    }
+    if (esc_i) DO_ESCAPE();
     i++;
   }
 
