@@ -51,6 +51,10 @@ int main(void) {
 // <>"'& => &lt;&gt;&quot;&#39;&amp;
 ```
 
+## Note
+
+Many ideas except `pcmpestri` are originally from [vmg/houdini](https://github.com/vmg/houdini).
+
 ## License
 
 MIT License
