@@ -1,4 +1,4 @@
-# Hescape
+# Hescape [![wercker status](https://app.wercker.com/status/cba5f4a964c895e34be39f184af59964/s/master "wercker status")](https://app.wercker.com/project/byKey/cba5f4a964c895e34be39f184af59964)
 
 C library for fast HTML escape using SSE instruction, `pcmpestri`.
 
