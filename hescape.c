@@ -93,7 +93,7 @@ find_escape_fast(const char *buf, size_t i, size_t size, int *found)
     __m128i escapes5 = _mm_loadu_si128((const __m128i *)escapes);
     size_t left = (size - i) & ~15;
     do {
-      __m128i b16 = _mm_loadu_si128((void *)buf);
+      __m128i b16 = _mm_loadu_si128((void *)(buf + i));
       int index = _mm_cmpestri(escapes5, 5, b16, 16, _SIDD_CMP_EQUAL_ANY);
       if (unlikely(index != 16)) {
         i += index;
