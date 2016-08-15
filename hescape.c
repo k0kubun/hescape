@@ -108,21 +108,27 @@ find_escape_fast(const char *buf, size_t i, size_t size, int *found)
 }
 #endif
 
+static inline size_t
+append_pending_buf(uint8_t *rbuf, size_t rbuf_i, const uint8_t *buf, size_t buf_i, size_t esize)
+{
+  memmove(rbuf + rbuf_i, buf + (rbuf_i - esize), buf_i - (rbuf_i - esize));
+  return buf_i + esize;
+}
+
+static inline size_t
+append_escaped_buf(uint8_t *rbuf, size_t rbuf_i, size_t esc_i, size_t *esize)
+{
+  memmove(rbuf + rbuf_i, ESCAPED_STRING[esc_i], ESC_LEN(esc_i));
+  *esize += ESC_LEN(esc_i) - 1;
+  return rbuf_i + ESC_LEN(esc_i);
+}
+
 size_t
 hesc_escape_html(uint8_t **dest, const uint8_t *buf, size_t size)
 {
-  size_t asize = 0, esc_i, esize = 0, i = 0, rbuf_end = 0;
+  size_t asize = 0, esc_i, esize = 0, i = 0, rbuf_i = 0;
   const uint8_t *esc;
   uint8_t *rbuf = NULL;
-
-# define DO_ESCAPE() { \
-    esc = ESCAPED_STRING[esc_i]; \
-    rbuf = ensure_allocated(rbuf, sizeof(uint8_t) * (size + esize + ESC_LEN(esc_i) + 1), &asize); \
-    memmove(rbuf + rbuf_end, buf + (rbuf_end - esize), i - (rbuf_end - esize)); \
-    memmove(rbuf + i + esize, esc, ESC_LEN(esc_i)); \
-    rbuf_end = i + esize + ESC_LEN(esc_i); \
-    esize += ESC_LEN(esc_i) - 1; \
-  }
 
 # ifdef __SSE4_2__
   int found = 0;
@@ -131,7 +137,11 @@ hesc_escape_html(uint8_t **dest, const uint8_t *buf, size_t size)
     if (!found) break;
 
     esc_i = HTML_ESCAPE_TABLE[buf[i]];
-    if (esc_i) DO_ESCAPE();
+    if (esc_i) {
+      rbuf = ensure_allocated(rbuf, sizeof(uint8_t) * (size + esize + ESC_LEN(esc_i) + 1), &asize);
+      rbuf_i = append_pending_buf(rbuf, rbuf_i, buf, i, esize);
+      rbuf_i = append_escaped_buf(rbuf, rbuf_i, esc_i, &esize);
+    }
     i++;
   }
 # endif
@@ -141,17 +151,20 @@ hesc_escape_html(uint8_t **dest, const uint8_t *buf, size_t size)
     while (i < size && (esc_i = HTML_ESCAPE_TABLE[buf[i]]) == 0)
       i++;
 
-    if (esc_i) DO_ESCAPE();
+    if (esc_i) {
+      rbuf = ensure_allocated(rbuf, sizeof(uint8_t) * (size + esize + ESC_LEN(esc_i) + 1), &asize);
+      rbuf_i = append_pending_buf(rbuf, rbuf_i, buf, i, esize);
+      rbuf_i = append_escaped_buf(rbuf, rbuf_i, esc_i, &esize);
+    }
     i++;
   }
 
-  if (rbuf_end == 0) {
+  if (rbuf_i == 0) {
     // Return given buf and size if there are no escaped characters.
     *dest = (uint8_t *)buf;
     return size;
   } else {
-    // Copy pending characters including NULL character.
-    memmove(rbuf + rbuf_end, buf + (rbuf_end - esize), (size + 1) - (rbuf_end - esize));
+    append_pending_buf(rbuf, rbuf_i, buf, size + 1, esize);
 
     *dest = rbuf;
     return size + esize;
