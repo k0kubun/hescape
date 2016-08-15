@@ -111,14 +111,14 @@ find_escape_fast(const char *buf, size_t i, size_t size, int *found)
 static inline size_t
 append_pending_buf(uint8_t *rbuf, size_t rbuf_i, const uint8_t *buf, size_t buf_i, size_t esize)
 {
-  memmove(rbuf + rbuf_i, buf + (rbuf_i - esize), buf_i - (rbuf_i - esize));
+  memcpy(rbuf + rbuf_i, buf + (rbuf_i - esize), buf_i - (rbuf_i - esize));
   return buf_i + esize;
 }
 
 static inline size_t
 append_escaped_buf(uint8_t *rbuf, size_t rbuf_i, size_t esc_i, size_t *esize)
 {
-  memmove(rbuf + rbuf_i, ESCAPED_STRING[esc_i], ESC_LEN(esc_i));
+  memcpy(rbuf + rbuf_i, ESCAPED_STRING[esc_i], ESC_LEN(esc_i));
   *esize += ESC_LEN(esc_i) - 1;
   return rbuf_i + ESC_LEN(esc_i);
 }
