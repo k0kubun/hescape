@@ -1,7 +1,7 @@
 LD=g++
 BENCHOBJS=benchmark/benchmark.o hescape.o benchmark/houdini/buffer.o benchmark/houdini/houdini_html_e.o
 TESTOBJS=test/html_escape.o hescape.o
-CFLAGS ?= -O3 -msse4
+CFLAGS ?= -O3 -msse4 -std=c99
 .PHONY: all bench clean test run
 
 all: hescape.o
