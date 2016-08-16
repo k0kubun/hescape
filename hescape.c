@@ -163,7 +163,8 @@ hesc_escape_html(uint8_t **dest, const uint8_t *buf, size_t size)
     *dest = (uint8_t *)buf;
     return size;
   } else {
-    append_pending_buf(rbuf, rbuf_i, buf, size + 1, esize);
+    append_pending_buf(rbuf, rbuf_i, buf, size, esize);
+    rbuf[size + esize] = '\0';
 
     *dest = rbuf;
     return size + esize;
