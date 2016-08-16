@@ -71,7 +71,7 @@ bench_escape(const char *label, const char *str, long iteration)
   double hesc_sec = measure_time(str, iteration, &escape_with_hescape);
   double houd_sec = measure_time(str, iteration, &escape_with_houdini);
 
-  printf("│ %-16s │ %5d │ %.2fx │ %f s (%9ld i/s) │ %f s (%9ld i/s) │ %9d │\n",
+  printf("│ %-16s │ %5ld │ %.2fx │ %f s (%9ld i/s) │ %f s (%9ld i/s) │ %9ld │\n",
       label, strlen(str), houd_sec / hesc_sec,
       hesc_sec, (long)(iteration / hesc_sec),
       houd_sec, (long)(iteration / houd_sec),
