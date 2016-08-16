@@ -71,7 +71,7 @@ bench_escape(const char *label, const char *str, long iteration)
   double hesc_sec = measure_time(str, iteration, &escape_with_hescape);
   double houd_sec = measure_time(str, iteration, &escape_with_houdini);
 
-  printf("│ %-16s │ %5ld │ %.2fx │ %f s (%9ld i/s) │ %f s (%9ld i/s) │ %9ld │\n",
+  printf("│ %-16s │ %5ld │ %5.2fx │ %f s (%9ld i/s) │ %f s (%9ld i/s) │ %9ld │\n",
       label, strlen(str), houd_sec / hesc_sec,
       hesc_sec, (long)(iteration / hesc_sec),
       houd_sec, (long)(iteration / houd_sec),
@@ -83,21 +83,21 @@ void print_table_sep();
 void
 print_table_header()
 {
-  printf("┌──────────────────┬───────┬───────┬────────────────────────────┬────────────────────────────┬───────────┐\n");
-  printf("│ Benchmark        │ Size  │ Rate  │ Hescape                    │ Houdini                    │ Iteration │\n");
+  printf("┌──────────────────┬───────┬────────┬────────────────────────────┬────────────────────────────┬───────────┐\n");
+  printf("│ Benchmark        │ Size  │ Rate   │ Hescape                    │ Houdini                    │ Iteration │\n");
   print_table_sep();
 }
 
 void
 print_table_sep()
 {
-  printf("├──────────────────┼───────┼───────┼────────────────────────────┼────────────────────────────┼───────────┤\n");
+  printf("├──────────────────┼───────┼────────┼────────────────────────────┼────────────────────────────┼───────────┤\n");
 }
 
 void
 print_table_footer()
 {
-  printf("└──────────────────┴───────┴───────┴────────────────────────────┴────────────────────────────┴───────────┘\n");
+  printf("└──────────────────┴───────┴────────┴────────────────────────────┴────────────────────────────┴───────────┘\n");
 }
 
 int
@@ -124,6 +124,10 @@ main(void)
   bench_escape("1 escape", "<123456789123456", 300000);
   bench_escape("2 escape", "<<23456789123456", 300000);
   bench_escape("3 escape", "<<<3456789123456", 300000);
+
+  // houdini treats `/` specially, so it's slow
+  bench_escape("15 slashes", "///////////////", 300000);
+  bench_escape("16 slashes", "////////////////", 300000);
 
   print_table_footer();
   return 0;
