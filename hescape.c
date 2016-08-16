@@ -128,7 +128,7 @@ hesc_escape_html(uint8_t **dest, const uint8_t *buf, size_t size)
   __m128i escapes5 = _mm_loadu_si128((const __m128i *)"\"&'<>");
   while (likely(size - i >= 16)) {
     int found = 0;
-    if ((esc_i = HTML_ESCAPE_TABLE[buf[i]]) == 0) {
+    if (unlikely((esc_i = HTML_ESCAPE_TABLE[buf[i]]) == 0)) {
       i = find_char_fast(buf, i, size, escapes5, 5, &found);
       if (!found) break;
       esc_i = HTML_ESCAPE_TABLE[buf[i]];

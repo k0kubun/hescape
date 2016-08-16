@@ -119,6 +119,9 @@ main(void)
   bench_escape("no escape 16", "0123456789123456", 3000000);
   bench_escape("all escape 15", "<<<<<<<<<<<<<<<", 300000);
   bench_escape("all escape 16", "<<<<<<<<<<<<<<<<", 300000);
+  bench_escape("all escape 32", "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<", 200000);
+  bench_escape("half escape a", strcont("a<", 100), 100000);
+  bench_escape("half escape b", strcont("<b", 100), 100000);
 
   // if escaped over twice, it allocates 1.5x memory
   bench_escape("1 escape", "<123456789123456", 300000);
