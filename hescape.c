@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include "hescape.h"
 
 #ifdef __SSE4_2__

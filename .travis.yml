@@ -9,4 +9,6 @@ script:
 matrix:
   include:
     - env: TASK=test
+    - env: TASK=test CFLAGS="-O3 -std=c99"
     - env: TASK=bench
+    - env: TASK=bench CFLAGS="-O3 -std=c99"
