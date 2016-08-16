@@ -2,6 +2,29 @@
 
 C library for fast HTML escape using SSE instruction, `pcmpestri`. For ruby, you can use this via [hescape gem](https://github.com/k0kubun/hescape-ruby).
 
+## API
+
+Hescape provides only one API, `hesc_escape_html`. It may change at any time since this project is experimental for now.
+
+```c
+size_t hesc_escape_html(uint8_t **dest, const uint8_t *src, size_t size);
+```
+
+Given `src` and `size` as `src`'s size, it stores a pointer for the escaped result to `dest` and returns the size of `dest`.  
+**NOTE:** `hesc_escape_html` allocates new memory only when `src` has characters to be escaped. So you need to free `dest` when return value is larger than `size`.
+
+It escapes `src` with the following rules.
+
+```
+  " --> &quot;
+  & --> &amp;
+  ' --> &#39;
+  < --> &lt;
+  > --> &gt;
+```
+
+It's designed to be the same as `CGI.escapeHTML` in Ruby.
+
 ## Benchmark
 
 See [the result](https://app.wercker.com/k0kubun/hescape/runs/build/57b0919ce8960a01001b323a?step=57b091afc164c60001dd5d6f) of [this benchmark](https://github.com/k0kubun/hescape/blob/ee34bf9c70301d4fa43ef9d88b5dafddffebc865/benchmark/benchmark.c).
