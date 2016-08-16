@@ -76,9 +76,6 @@ ensure_allocated(uint8_t *buf, size_t size, size_t *asize)
   while (new_size < size)
     new_size = (new_size << 1) - (new_size >> 1);
 
-  // Round allocation up to multiple of 8.
-  new_size = (new_size + 7) & ~7;
-
   *asize = new_size;
   return realloc(buf, new_size);
 }
