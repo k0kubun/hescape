@@ -83,16 +83,13 @@ ensure_allocated(uint8_t *buf, size_t size, size_t *asize)
 
 #ifdef __SSE4_2__
 static size_t
-find_escape_fast(const char *buf, size_t i, size_t size, int *found)
+find_char_fast(const char *buf, size_t i, size_t size, __m128i range, size_t range_size, int *found)
 {
-  static const char escapes[] = "\"&'<>";
-
   if (likely(size - i >= 16)) {
-    __m128i escapes5 = _mm_loadu_si128((const __m128i *)escapes);
     size_t left = (size - i) & ~15;
     do {
       __m128i b16 = _mm_loadu_si128((void *)(buf + i));
-      int index = _mm_cmpestri(escapes5, 5, b16, 16, _SIDD_CMP_EQUAL_ANY);
+      int index = _mm_cmpestri(range, range_size, b16, 16, _SIDD_CMP_EQUAL_ANY);
       if (unlikely(index != 16)) {
         i += index;
         *found = 1;
@@ -129,10 +126,11 @@ hesc_escape_html(uint8_t **dest, const uint8_t *buf, size_t size)
   uint8_t *rbuf = NULL;
 
 # ifdef __SSE4_2__
+  __m128i escapes5 = _mm_loadu_si128((const __m128i *)"\"&'<>");
   while (i < size) {
     int found = 0;
     if ((esc_i = HTML_ESCAPE_TABLE[buf[i]]) == 0) {
-      i = find_escape_fast(buf, i, size, &found);
+      i = find_char_fast(buf, i, size, escapes5, 5, &found);
       if (!found) break;
       esc_i = HTML_ESCAPE_TABLE[buf[i]];
     }
