@@ -1,0 +1,10 @@
+language: c
+branches:
+  only:
+    - master
+script:
+  - "make $TASK"
+matrix:
+  include:
+    - env: TASK=test
+    - env: TASK=bench
