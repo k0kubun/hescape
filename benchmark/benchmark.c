@@ -68,21 +68,52 @@ escape_with_houdini(const char *str)
 void
 bench_escape(const char *label, const char *str, long iteration)
 {
-  printf("==============================================\n %s (size=%ld)\n", label, strlen(str));
-  printf("==============================================\n");
-
   double hesc_sec = measure_time(str, iteration, &escape_with_hescape);
-  printf("hescape: %f s (%.1f i/s)\n", hesc_sec, iteration / hesc_sec);
-
   double houd_sec = measure_time(str, iteration, &escape_with_houdini);
-  printf("houdini: %f s (%.1f i/s)\n\n", houd_sec, iteration / houd_sec);
 
-  printf("hescape is %.2fx faster\n\n", houd_sec / hesc_sec);
+  printf("│ %-16s │ %5d │ %.2fx │ %f s (%9ld i/s) │ %f s (%9ld i/s) │ %9d │\n",
+      label, strlen(str), houd_sec / hesc_sec,
+      hesc_sec, (long)(iteration / hesc_sec),
+      houd_sec, (long)(iteration / houd_sec),
+      iteration);
+}
+
+void print_table_sep();
+
+void
+print_table_header()
+{
+  printf("┌──────────────────┬───────┬───────┬────────────────────────────┬────────────────────────────┬───────────┐\n");
+  printf("│ Benchmark        │ Size  │ Rate  │ Hescape                    │ Houdini                    │ Iteration │\n");
+  print_table_sep();
+}
+
+void
+print_table_sep()
+{
+  printf("├──────────────────┼───────┼───────┼────────────────────────────┼────────────────────────────┼───────────┤\n");
+}
+
+void
+print_table_footer()
+{
+  printf("└──────────────────┴───────┴───────┴────────────────────────────┴────────────────────────────┴───────────┘\n");
 }
 
 int
 main(void)
 {
+  print_table_header();
+
+  // benchmark with reliable length
+  bench_escape("no escape 1000", strcont("0123456789", 100), 300000);
+  bench_escape("10% escape", strcont("'123456789", 100), 80000);
+  bench_escape("all escape", strcont("><&\"'", 200), 20000);
+
+  // houdini's benchmark
+  bench_escape("wikipedia table", readfile("benchmark/wikipedia_table.txt"), 10000);
+  print_table_sep();
+
   // if size is <= 15, it does not use pcmpestri.
   bench_escape("no escape 15", "012345678912345", 3000000);
   bench_escape("no escape 16", "0123456789123456", 3000000);
@@ -94,13 +125,6 @@ main(void)
   bench_escape("2 escape", "<<23456789123456", 300000);
   bench_escape("3 escape", "<<<3456789123456", 300000);
 
-  // benchmark with reliable length
-  bench_escape("no escape 1000", strcont("0123456789", 100), 300000);
-  bench_escape("10% escape", strcont("'123456789", 100), 80000);
-  bench_escape("all escape", strcont("><&\"'", 200), 20000);
-
-  // houdini's benchmark
-  bench_escape("wikipedia table", readfile("benchmark/wikipedia_table.txt"), 10000);
-
+  print_table_footer();
   return 0;
 }
