@@ -27,7 +27,10 @@ readfile(const char *filename)
   rewind(fp);
 
   char *ret = malloc(sizeof(char) * (size + 1));
-  fread(ret, sizeof(char), size, fp);
+  if (fread(ret, sizeof(char), size, fp) == 0) {
+    fprintf(stderr, "No characters couldn't be read from %s.\n", filename);
+    exit(1);
+  };
   return ret;
 }
 
