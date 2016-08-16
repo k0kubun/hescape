@@ -68,7 +68,7 @@ escape_with_houdini(const char *str)
 void
 bench_escape(const char *label, const char *str, long iteration)
 {
-  printf("==============================================\n %s (N=%ld)\n", label, iteration);
+  printf("==============================================\n %s (size=%ld)\n", label, strlen(str));
   printf("==============================================\n");
 
   double hesc_sec = measure_time(str, iteration, &escape_with_hescape);
@@ -83,9 +83,15 @@ bench_escape(const char *label, const char *str, long iteration)
 int
 main(void)
 {
-  bench_escape("no escape", strcont("0123456789", 100), 300000);
+  bench_escape("no escape 15", "012345678912345", 3000000);
+  bench_escape("no escape 16", "0123456789123456", 3000000);
+  bench_escape("all escape 15", "<<<<<<<<<<<<<<<", 300000);
+  bench_escape("all escape 16", "<<<<<<<<<<<<<<<<", 300000);
+
+  bench_escape("no escape 1000", strcont("0123456789", 100), 300000);
   bench_escape("10% escape", strcont("'123456789", 100), 80000);
   bench_escape("all escape", strcont("><&\"'", 200), 20000);
   bench_escape("wikipedia table", readfile("benchmark/wikipedia_table.txt"), 10000);
+
   return 0;
 }
