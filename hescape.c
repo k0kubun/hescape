@@ -131,17 +131,16 @@ hesc_escape_html(uint8_t **dest, const uint8_t *buf, size_t size)
   uint8_t *rbuf = NULL;
 
 # ifdef __SSE4_2__
-  int found = 0;
   while (i < size) {
-    i = find_escape_fast(buf, i, size, &found);
-    if (!found) break;
-
-    esc_i = HTML_ESCAPE_TABLE[buf[i]];
-    if (esc_i) {
-      rbuf = ensure_allocated(rbuf, sizeof(uint8_t) * (size + esize + ESC_LEN(esc_i) + 1), &asize);
-      rbuf_i = append_pending_buf(rbuf, rbuf_i, buf, i, esize);
-      rbuf_i = append_escaped_buf(rbuf, rbuf_i, esc_i, &esize);
+    int found = 0;
+    if ((esc_i = HTML_ESCAPE_TABLE[buf[i]]) == 0) {
+      i = find_escape_fast(buf, i, size, &found);
+      if (!found) break;
+      esc_i = HTML_ESCAPE_TABLE[buf[i]];
     }
+    rbuf = ensure_allocated(rbuf, sizeof(uint8_t) * (size + esize + ESC_LEN(esc_i) + 1), &asize);
+    rbuf_i = append_pending_buf(rbuf, rbuf_i, buf, i, esize);
+    rbuf_i = append_escaped_buf(rbuf, rbuf_i, esc_i, &esize);
     i++;
   }
 # endif
