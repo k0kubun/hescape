@@ -11,8 +11,8 @@ size_t hesc_escape_html(uint8_t **dest, const uint8_t *src, size_t size);
 ```
 
 Given `src` and `size`, it stores a pointer for the escaped result to `dest` and returns its size.
-Note that `hesc_escape_html` allocates new memory only when `src` has characters to be escaped.
-So you need to free `dest` when return value is larger than `size`.
+Note that `hesc_escape_html` expects `src` to be UTF-8 string and it allocates new memory only when `src` has characters to be escaped.
+You need to free `dest` when return value is larger than `size`.
 
 It escapes `src` with the following rules.
 
